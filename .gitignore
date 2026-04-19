@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Large data files
+*.hdf5
+*.h5
+
+# Argo data directory
+EasyOneArgoTSLite_*/
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
