@@ -6,7 +6,7 @@ from pgv_rom import PGVReducedOrderModel
 
 app = Flask(__name__)
 
-# 加载模型
+# loading
 MODEL_PATH = "loh_rom.joblib"
 model = None
 
@@ -152,10 +152,10 @@ def predict():
     # Apply physically realistic smoothing
     smoothed_grid = apply_realistic_smoothing(predicted_grid.T, strike, dip, rake)
 
-    # 转换为cm/s
+    # cm/s
     grid_cmps = 100.0 * smoothed_grid
 
-    # 返回原始数据而非图像
+    # return 
     return jsonify({
         'data': grid_cmps.tolist(),
         'stats': {
