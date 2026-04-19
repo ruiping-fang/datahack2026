@@ -8,6 +8,7 @@ import h5py
 import joblib
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.animation import FuncAnimation, PillowWriter
 from scipy.interpolate import RBFInterpolator
 from sklearn.model_selection import train_test_split
 
@@ -198,6 +199,73 @@ def predict_command(args: argparse.Namespace) -> int:
     return 0
 
 
+def parse_param_range(value: str) -> tuple[float, float] | float:
+    """Parse a parameter value as either 'start,end' or a single float."""
+    parts = value.split(",")
+    if len(parts) == 1:
+        return float(parts[0])
+    elif len(parts) == 2:
+        return float(parts[0]), float(parts[1])
+    else:
+        raise ValueError(f"Invalid parameter format: {value}. Use 'value' or 'start,end'")
+
+
+def animate_command(args: argparse.Namespace) -> int:
+    model = PGVReducedOrderModel.load(args.model)
+
+    depth_range = parse_param_range(args.depth)
+    strike_range = parse_param_range(args.strike)
+    dip_range = parse_param_range(args.dip)
+    rake_range = parse_param_range(args.rake)
+
+    depth_values = np.linspace(*depth_range, args.frames) if isinstance(depth_range, tuple) else np.full(args.frames, depth_range)
+    strike_values = np.linspace(*strike_range, args.frames) if isinstance(strike_range, tuple) else np.full(args.frames, strike_range)
+    dip_values = np.linspace(*dip_range, args.frames) if isinstance(dip_range, tuple) else np.full(args.frames, dip_range)
+    rake_values = np.linspace(*rake_range, args.frames) if isinstance(rake_range, tuple) else np.full(args.frames, rake_range)
+
+    all_grids = []
+    print(f"Generating {args.frames} frames...")
+    for i in range(args.frames):
+        params = np.array([depth_values[i], strike_values[i], dip_values[i], rake_values[i]], dtype=float)
+        grid = model.predict_grid(params)
+        all_grids.append(100.0 * grid.T)
+        if (i + 1) % 10 == 0:
+            print(f"  Frame {i + 1}/{args.frames}")
+
+    vmin = min(g.min() for g in all_grids)
+    vmax = max(g.max() for g in all_grids)
+
+    fig, ax = plt.subplots(figsize=(6, 5))
+    image = ax.imshow(all_grids[0], origin="lower", cmap="inferno", vmin=vmin, vmax=vmax)
+    title = ax.text(0.5, 1.02, "", ha="center", transform=ax.transAxes)
+    ax.set_xlabel("Grid X")
+    ax.set_ylabel("Grid Y")
+    fig.colorbar(image, ax=ax, label="PGV (cm/s)")
+    fig.tight_layout()
+
+    def update(frame: int):
+        image.set_data(all_grids[frame])
+        title.set_text(
+            f"depth={depth_values[frame]:.1f}km, strike={strike_values[frame]:.1f}°, "
+            f"dip={dip_values[frame]:.1f}°, rake={rake_values[frame]:.1f}°"
+        )
+        return image, title
+
+    anim = FuncAnimation(fig, update, frames=args.frames, interval=args.interval, blit=True)
+
+    if args.gif:
+        writer = PillowWriter(fps=1000.0 / args.interval)
+        anim.save(args.gif, writer=writer)
+        print(f"Saved animation to {args.gif}")
+
+    if args.mp4:
+        anim.save(args.mp4, writer="ffmpeg", fps=1000.0 / args.interval)
+        print(f"Saved animation to {args.mp4}")
+
+    plt.close(fig)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Train and use a reduced-order PGV map model.")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -223,6 +291,18 @@ def build_parser() -> argparse.ArgumentParser:
     predict_parser.add_argument("--output", default="predicted_pgv.npy", help="Output .npy path.")
     predict_parser.add_argument("--png", default=None, help="Optional output image path.")
     predict_parser.set_defaults(func=predict_command)
+
+    animate_parser = subparsers.add_parser("animate", help="Generate animated PGV maps with varying parameters.")
+    animate_parser.add_argument("--model", required=True, help="Path to a trained model artifact.")
+    animate_parser.add_argument("--depth", required=True, help="Depth: 'value' or 'start,end' (km).")
+    animate_parser.add_argument("--strike", required=True, help="Strike: 'value' or 'start,end' (degrees).")
+    animate_parser.add_argument("--dip", required=True, help="Dip: 'value' or 'start,end' (degrees).")
+    animate_parser.add_argument("--rake", required=True, help="Rake: 'value' or 'start,end' (degrees).")
+    animate_parser.add_argument("--frames", type=int, default=30, help="Number of frames to generate.")
+    animate_parser.add_argument("--interval", type=int, default=100, help="Interval between frames in ms.")
+    animate_parser.add_argument("--gif", default=None, help="Output GIF path.")
+    animate_parser.add_argument("--mp4", default=None, help="Output MP4 path (requires ffmpeg).")
+    animate_parser.set_defaults(func=animate_command)
 
     return parser
 

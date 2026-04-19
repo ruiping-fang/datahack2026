@@ -1,0 +1,7 @@
+flask
+numpy
+matplotlib
+scipy
+scikit-learn
+h5py
+joblib

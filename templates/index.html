@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PGV Prediction Interactive</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .control-group {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .control-group:hover {
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .value-display {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.95em;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: #5568d3;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .visualization-container {
+            position: relative;
+        }
+
+        .param-badges {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .badge-label {
+            opacity: 0.8;
+            margin-right: 4px;
+        }
+
+        #heatmap {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 600px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skeleton {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                #f0f0f0 0%,
+                #e0e0e0 50%,
+                #f0f0f0 100%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .skeleton.active {
+            opacity: 1;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .auto-update-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: #ccc;
+            border-radius: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #667eea;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            left: 27px;
+        }
+
+        .toggle-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .loading-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 10;
+        }
+
+        .loading-indicator.active {
+            opacity: 1;
+        }
+
+        @media (max-width: 1024px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌊 Peak Ground Velocity Predictor</h1>
+            <p>Interactive earthquake ground motion visualization</p>
+        </div>
+
+        <div class="content">
+            <div class="controls">
+                <div class="auto-update-toggle">
+                    <div class="toggle-switch active" id="autoUpdateToggle" onclick="toggleAutoUpdate()"></div>
+                    <span class="toggle-label">Auto-update</span>
+                </div>
+
+                <div class="control-group">
+                    <label>
+                        Depth (km)
+                        <span class="value-display" id="depth-value">10.0</span>
+                    </label>
+                    <input type="range" id="depth" min="5" max="15" step="0.5" value="10">
+                    <div class="range-labels">
+                        <span>5 km</span>
+                        <span>15 km</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>
+                        Strike (°)
+                        <span class="value-display" id="strike-value">120</span>
+                    </label>
+                    <input type="range" id="strike" min="0" max="360" step="5" value="120">
+                    <div class="range-labels">
+                        <span>0°</span>
+                        <span>360°</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>
+                        Dip (°)
+                        <span class="value-display" id="dip-value">60</span>
+                    </label>
+                    <input type="range" id="dip" min="0" max="90" step="5" value="60">
+                    <div class="range-labels">
+                        <span>0°</span>
+                        <span>90°</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>
+                        Rake (°)
+                        <span class="value-display" id="rake-value">90</span>
+                    </label>
+                    <input type="range" id="rake" min="-180" max="180" step="5" value="90">
+                    <div class="range-labels">
+                        <span>-180°</span>
+                        <span>180°</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="visualization-container">
+                <div class="param-badges" id="paramBadges"></div>
+                <div id="heatmap">
+                    <div class="skeleton" id="skeleton"></div>
+                    <div class="loading-indicator" id="loadingIndicator">Updating...</div>
+                </div>
+                <div class="stats" id="stats" style="opacity: 0;">
+                    <div class="stat-box">
+                        <div class="stat-label">Min PGV</div>
+                        <div class="stat-value" id="stat-min">-</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Max PGV</div>
+                        <div class="stat-value" id="stat-max">-</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Mean PGV</div>
+                        <div class="stat-value" id="stat-mean">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let autoUpdate = true;
+        let debounceTimer = null;
+        let isLoading = false;
+        let currentData = null;
+
+        // 更新参数 badges
+        function updateBadges() {
+            const depth = document.getElementById('depth').value;
+            const strike = document.getElementById('strike').value;
+            const dip = document.getElementById('dip').value;
+            const rake = document.getElementById('rake').value;
+
+            const badgesHtml = `
+                <div class="badge"><span class="badge-label">Depth:</span>${depth} km</div>
+                <div class="badge"><span class="badge-label">Strike:</span>${strike}°</div>
+                <div class="badge"><span class="badge-label">Dip:</span>${dip}°</div>
+                <div class="badge"><span class="badge-label">Rake:</span>${rake}°</div>
+            `;
+            document.getElementById('paramBadges').innerHTML = badgesHtml;
+        }
+
+        // 切换自动更新
+        function toggleAutoUpdate() {
+            autoUpdate = !autoUpdate;
+            const toggle = document.getElementById('autoUpdateToggle');
+            toggle.classList.toggle('active', autoUpdate);
+        }
+
+        // 更新显示值并触发预测
+        document.querySelectorAll('input[type="range"]').forEach(input => {
+            input.addEventListener('input', function() {
+                const valueDisplay = document.getElementById(`${this.id}-value`);
+                valueDisplay.textContent = this.value;
+                updateBadges();
+
+                if (autoUpdate) {
+                    // Debounce: 500ms 后自动请求
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => {
+                        predict();
+                    }, 500);
+                }
+            });
+        });
+
+        async function predict() {
+            if (isLoading) return;
+
+            const depth = parseFloat(document.getElementById('depth').value);
+            const strike = parseFloat(document.getElementById('strike').value);
+            const dip = parseFloat(document.getElementById('dip').value);
+            const rake = parseFloat(document.getElementById('rake').value);
+
+            const skeleton = document.getElementById('skeleton');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const stats = document.getElementById('stats');
+
+            isLoading = true;
+            skeleton.classList.add('active');
+            loadingIndicator.classList.add('active');
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ depth, strike, dip, rake })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    console.error('Error:', data.error);
+                    return;
+                }
+
+                currentData = data;
+
+                // 更新热力图（平滑过渡）
+                updateHeatmap(data.data);
+
+                // 更新统计信息（平滑淡入）
+                document.getElementById('stat-min').textContent = data.stats.min.toFixed(2) + ' cm/s';
+                document.getElementById('stat-max').textContent = data.stats.max.toFixed(2) + ' cm/s';
+                document.getElementById('stat-mean').textContent = data.stats.mean.toFixed(2) + ' cm/s';
+                stats.style.opacity = '1';
+
+            } catch (error) {
+                console.error('Network error:', error);
+            } finally {
+                isLoading = false;
+                skeleton.classList.remove('active');
+                loadingIndicator.classList.remove('active');
+            }
+        }
+
+        function updateHeatmap(data) {
+            const trace = {
+                z: data,
+                type: 'heatmap',
+                colorscale: 'Hot',
+                reversescale: true,
+                hovertemplate: 'X: %{x}<br>Y: %{y}<br>PGV: %{z:.2f} cm/s<extra></extra>',
+                colorbar: {
+                    title: 'PGV (cm/s)',
+                    titleside: 'right',
+                    thickness: 20,
+                    len: 0.7
+                }
+            };
+
+            const layout = {
+                title: {
+                    text: 'Peak Ground Velocity Distribution',
+                    font: { size: 18, weight: 600 }
+                },
+                xaxis: { title: 'Grid X' },
+                yaxis: { title: 'Grid Y' },
+                margin: { t: 60, r: 80, b: 60, l: 60 },
+                paper_bgcolor: '#f8f9fa',
+                plot_bgcolor: '#fff'
+            };
+
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                displaylogo: false,
+                modeBarButtonsToRemove: ['lasso2d', 'select2d']
+            };
+
+            // 平滑过渡更新
+            if (document.getElementById('heatmap').data) {
+                Plotly.animate('heatmap', {
+                    data: [trace],
+                    layout: layout
+                }, {
+                    transition: {
+                        duration: 300,
+                        easing: 'cubic-in-out'
+                    }
+                });
+            } else {
+                Plotly.newPlot('heatmap', [trace], layout, config);
+            }
+        }
+
+        // 初始化
+        updateBadges();
+        predict();
+    </script>
+</body>
+</html>
