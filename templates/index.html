@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PGV Prediction Interactive</title>
+    <title>PGV Predictor - Neumorphism Dashboard</title>
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <style>
         * {
@@ -13,296 +13,353 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #eef1f5;
             min-height: 100vh;
-            padding: 20px;
+            padding: 30px 20px;
+            color: #4a5568;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1500px;
             margin: 0 auto;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
         }
 
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
+            border-radius: 24px;
+            padding: 40px;
             text-align: center;
-            position: relative;
+            margin-bottom: 40px;
+            box-shadow:
+                12px 12px 24px rgba(102, 126, 234, 0.3),
+                -8px -8px 20px rgba(255, 255, 255, 0.1);
         }
 
         .header h1 {
-            font-size: 2.5em;
+            font-size: 2.8em;
+            font-weight: 700;
+            color: white;
             margin-bottom: 10px;
+            letter-spacing: -0.5px;
         }
 
         .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
+            font-size: 1.15em;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 400;
         }
 
         .content {
             display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 30px;
-            padding: 30px;
+            grid-template-columns: 380px 1fr;
+            gap: 40px;
         }
 
         .controls {
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 24px;
         }
 
-        .control-group {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 12px;
-            border-left: 4px solid #667eea;
-            transition: all 0.3s;
+        .neu-card {
+            background: #eef1f5;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow:
+                8px 8px 16px #d1d9e6,
+                -8px -8px 16px #ffffff;
+            transition: all 0.3s ease;
         }
 
-        .control-group:hover {
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        .neu-card:hover {
+            box-shadow:
+                12px 12px 24px #d1d9e6,
+                -12px -12px 24px #ffffff;
         }
 
         .control-group label {
             display: block;
             font-weight: 600;
-            margin-bottom: 10px;
-            color: #333;
-            font-size: 1.1em;
+            font-size: 1.05em;
+            color: #4a5568;
+            margin-bottom: 14px;
         }
 
-        .value-display {
+        .value-pill {
             display: inline-block;
-            background: #667eea;
-            color: white;
-            padding: 4px 12px;
+            background: #eef1f5;
+            color: #667eea;
+            padding: 6px 18px;
             border-radius: 20px;
             font-size: 0.95em;
-            margin-left: 10px;
-            transition: all 0.3s;
+            font-weight: 700;
+            margin-left: 12px;
+            box-shadow:
+                inset 3px 3px 6px #d1d9e6,
+                inset -3px -3px 6px #ffffff;
+        }
+
+        .slider-container {
+            margin: 16px 0;
         }
 
         input[type="range"] {
             width: 100%;
-            height: 8px;
-            border-radius: 5px;
-            background: #d3d3d3;
+            height: 10px;
+            border-radius: 10px;
+            background: #eef1f5;
             outline: none;
             -webkit-appearance: none;
+            box-shadow:
+                inset 4px 4px 8px #d1d9e6,
+                inset -4px -4px 8px #ffffff;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
-            background: #667eea;
+            background: linear-gradient(145deg, #7289f5, #5e72db);
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            box-shadow:
+                4px 4px 8px #d1d9e6,
+                -4px -4px 8px #ffffff;
             transition: all 0.2s;
         }
 
         input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            background: #5568d3;
+            transform: scale(1.15);
+            box-shadow:
+                6px 6px 12px #d1d9e6,
+                -6px -6px 12px #ffffff;
         }
 
         input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
-            background: #667eea;
+            background: linear-gradient(145deg, #7289f5, #5e72db);
             cursor: pointer;
             border: none;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            box-shadow:
+                4px 4px 8px #d1d9e6,
+                -4px -4px 8px #ffffff;
         }
 
         .range-labels {
             display: flex;
             justify-content: space-between;
             font-size: 0.85em;
-            color: #666;
-            margin-top: 5px;
+            color: #8492a6;
+            margin-top: 8px;
         }
 
-        .visualization-container {
-            position: relative;
-        }
-
-        .param-badges {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
-
-        .badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-        }
-
-        .badge-label {
-            opacity: 0.8;
-            margin-right: 4px;
-        }
-
-        #heatmap {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 20px;
-            min-height: 600px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .skeleton {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(
-                90deg,
-                #f0f0f0 0%,
-                #e0e0e0 50%,
-                #f0f0f0 100%
-            );
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 12px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .skeleton.active {
-            opacity: 1;
-        }
-
-        @keyframes shimmer {
-            0% {
-                background-position: -200% 0;
-            }
-            100% {
-                background-position: 200% 0;
-            }
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .stat-box {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: all 0.3s;
-        }
-
-        .stat-box:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-        }
-
-        .stat-label {
-            font-size: 0.85em;
-            color: #666;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-value {
-            font-size: 1.5em;
-            font-weight: 700;
-            color: #667eea;
-        }
-
-        .auto-update-toggle {
+        .toggle-container {
             display: flex;
             align-items: center;
-            gap: 10px;
-            background: #fff;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            gap: 14px;
         }
 
         .toggle-switch {
             position: relative;
-            width: 50px;
-            height: 26px;
-            background: #ccc;
-            border-radius: 13px;
+            width: 60px;
+            height: 30px;
+            background: #eef1f5;
+            border-radius: 30px;
             cursor: pointer;
+            box-shadow:
+                inset 4px 4px 8px #d1d9e6,
+                inset -4px -4px 8px #ffffff;
             transition: all 0.3s;
         }
 
         .toggle-switch.active {
-            background: #667eea;
+            background: linear-gradient(145deg, #7289f5, #5e72db);
+            box-shadow:
+                4px 4px 8px #d1d9e6,
+                -4px -4px 8px #ffffff,
+                inset 0 0 8px rgba(255, 255, 255, 0.3);
         }
 
         .toggle-switch::after {
             content: '';
             position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 20px;
-            height: 20px;
-            background: white;
+            top: 4px;
+            left: 4px;
+            width: 22px;
+            height: 22px;
+            background: #eef1f5;
             border-radius: 50%;
+            box-shadow:
+                2px 2px 4px #d1d9e6,
+                -2px -2px 4px #ffffff;
             transition: all 0.3s;
         }
 
         .toggle-switch.active::after {
-            left: 27px;
+            left: 34px;
+            box-shadow:
+                3px 3px 6px rgba(0, 0, 0, 0.2),
+                -2px -2px 4px rgba(255, 255, 255, 0.8);
         }
 
         .toggle-label {
             font-weight: 600;
-            color: #333;
+            color: #4a5568;
+            font-size: 1.05em;
+        }
+
+        .visualization-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .param-badges {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .param-badge {
+            background: #eef1f5;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #667eea;
+            box-shadow:
+                6px 6px 12px #d1d9e6,
+                -6px -6px 12px #ffffff;
+        }
+
+        .badge-label {
+            color: #8492a6;
+            margin-right: 6px;
+            font-weight: 500;
+        }
+
+        .heatmap-card {
+            background: #eef1f5;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow:
+                10px 10px 20px #d1d9e6,
+                -10px -10px 20px #ffffff;
+            min-height: 650px;
+            position: relative;
+        }
+
+        #heatmap {
+            background: #f8f9fb;
+            border-radius: 16px;
+            padding: 20px;
+            min-height: 580px;
+            box-shadow:
+                inset 4px 4px 8px #e5e8ed,
+                inset -4px -4px 8px #ffffff;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .stat-box {
+            background: #eef1f5;
+            padding: 28px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow:
+                inset 6px 6px 12px #d1d9e6,
+                inset -6px -6px 12px #ffffff;
+            transition: all 0.3s;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #8492a6;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 1.6em;
+            font-weight: 700;
+            color: #667eea;
+            text-shadow: 0 1px 2px rgba(102, 126, 234, 0.1);
+        }
+
+        .skeleton {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            right: 30px;
+            bottom: 30px;
+            background: linear-gradient(
+                90deg,
+                #eef1f5 0%,
+                #e5e8ed 50%,
+                #eef1f5 100%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 1.8s infinite;
+            border-radius: 16px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .skeleton.active {
+            opacity: 0.6;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
         }
 
         .loading-indicator {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(102, 126, 234, 0.9);
+            top: 40px;
+            right: 40px;
+            background: linear-gradient(145deg, #7289f5, #5e72db);
             color: white;
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 20px;
             font-size: 0.9em;
             font-weight: 600;
             opacity: 0;
             transition: opacity 0.3s;
             z-index: 10;
+            box-shadow:
+                4px 4px 8px rgba(209, 217, 230, 0.8),
+                -2px -2px 6px rgba(255, 255, 255, 0.5);
         }
 
         .loading-indicator.active {
             opacity: 1;
         }
 
-        @media (max-width: 1024px) {
+        @media (max-width: 1200px) {
             .content {
                 grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
             }
 
             .stats {
@@ -314,83 +371,96 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🌊 Peak Ground Velocity Predictor</h1>
+            <h1>Peak Ground Velocity Predictor</h1>
             <p>Interactive earthquake ground motion visualization</p>
         </div>
 
         <div class="content">
             <div class="controls">
-                <div class="auto-update-toggle">
-                    <div class="toggle-switch active" id="autoUpdateToggle" onclick="toggleAutoUpdate()"></div>
-                    <span class="toggle-label">Auto-update</span>
+                <div class="neu-card">
+                    <div class="toggle-container">
+                        <div class="toggle-switch active" id="autoUpdateToggle" onclick="toggleAutoUpdate()"></div>
+                        <span class="toggle-label">Auto-update</span>
+                    </div>
                 </div>
 
-                <div class="control-group">
+                <div class="neu-card control-group">
                     <label>
                         Depth (km)
-                        <span class="value-display" id="depth-value">10.0</span>
+                        <span class="value-pill" id="depth-value">10.0</span>
                     </label>
-                    <input type="range" id="depth" min="5" max="15" step="0.5" value="10">
-                    <div class="range-labels">
-                        <span>5 km</span>
-                        <span>15 km</span>
+                    <div class="slider-container">
+                        <input type="range" id="depth" min="5" max="15" step="0.5" value="10">
+                        <div class="range-labels">
+                            <span>5 km</span>
+                            <span>15 km</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="control-group">
+                <div class="neu-card control-group">
                     <label>
                         Strike (°)
-                        <span class="value-display" id="strike-value">120</span>
+                        <span class="value-pill" id="strike-value">120</span>
                     </label>
-                    <input type="range" id="strike" min="0" max="360" step="5" value="120">
-                    <div class="range-labels">
-                        <span>0°</span>
-                        <span>360°</span>
+                    <div class="slider-container">
+                        <input type="range" id="strike" min="0" max="360" step="5" value="120">
+                        <div class="range-labels">
+                            <span>0°</span>
+                            <span>360°</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="control-group">
+                <div class="neu-card control-group">
                     <label>
                         Dip (°)
-                        <span class="value-display" id="dip-value">60</span>
+                        <span class="value-pill" id="dip-value">60</span>
                     </label>
-                    <input type="range" id="dip" min="0" max="90" step="5" value="60">
-                    <div class="range-labels">
-                        <span>0°</span>
-                        <span>90°</span>
+                    <div class="slider-container">
+                        <input type="range" id="dip" min="0" max="90" step="5" value="60">
+                        <div class="range-labels">
+                            <span>0°</span>
+                            <span>90°</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="control-group">
+                <div class="neu-card control-group">
                     <label>
                         Rake (°)
-                        <span class="value-display" id="rake-value">90</span>
+                        <span class="value-pill" id="rake-value">90</span>
                     </label>
-                    <input type="range" id="rake" min="-180" max="180" step="5" value="90">
-                    <div class="range-labels">
-                        <span>-180°</span>
-                        <span>180°</span>
+                    <div class="slider-container">
+                        <input type="range" id="rake" min="-180" max="180" step="5" value="90">
+                        <div class="range-labels">
+                            <span>-180°</span>
+                            <span>180°</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="visualization-container">
                 <div class="param-badges" id="paramBadges"></div>
-                <div id="heatmap">
+
+                <div class="heatmap-card">
                     <div class="skeleton" id="skeleton"></div>
                     <div class="loading-indicator" id="loadingIndicator">Updating...</div>
+                    <div id="heatmap"></div>
                 </div>
+
                 <div class="stats" id="stats" style="opacity: 0;">
                     <div class="stat-box">
-                        <div class="stat-label">Min PGV</div>
+                        <div class="stat-label">MIN PGV</div>
                         <div class="stat-value" id="stat-min">-</div>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-label">Max PGV</div>
+                        <div class="stat-label">MAX PGV</div>
                         <div class="stat-value" id="stat-max">-</div>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-label">Mean PGV</div>
+                        <div class="stat-label">MEAN PGV</div>
                         <div class="stat-value" id="stat-mean">-</div>
                     </div>
                 </div>
@@ -404,7 +474,21 @@
         let isLoading = false;
         let currentData = null;
 
-        // 更新参数 badges
+        const customColorscale = [
+            [0, '#0a0033'],
+            [0.1, '#1a0052'],
+            [0.2, '#2d006b'],
+            [0.3, '#4d0099'],
+            [0.4, '#7300cc'],
+            [0.5, '#9900ff'],
+            [0.6, '#cc33ff'],
+            [0.65, '#ff3366'],
+            [0.7, '#ff5533'],
+            [0.8, '#ff8800'],
+            [0.9, '#ffcc00'],
+            [1.0, '#ffff99']
+        ];
+
         function updateBadges() {
             const depth = document.getElementById('depth').value;
             const strike = document.getElementById('strike').value;
@@ -412,22 +496,20 @@
             const rake = document.getElementById('rake').value;
 
             const badgesHtml = `
-                <div class="badge"><span class="badge-label">Depth:</span>${depth} km</div>
-                <div class="badge"><span class="badge-label">Strike:</span>${strike}°</div>
-                <div class="badge"><span class="badge-label">Dip:</span>${dip}°</div>
-                <div class="badge"><span class="badge-label">Rake:</span>${rake}°</div>
+                <div class="param-badge"><span class="badge-label">Depth:</span>${depth} km</div>
+                <div class="param-badge"><span class="badge-label">Strike:</span>${strike}°</div>
+                <div class="param-badge"><span class="badge-label">Dip:</span>${dip}°</div>
+                <div class="param-badge"><span class="badge-label">Rake:</span>${rake}°</div>
             `;
             document.getElementById('paramBadges').innerHTML = badgesHtml;
         }
 
-        // 切换自动更新
         function toggleAutoUpdate() {
             autoUpdate = !autoUpdate;
             const toggle = document.getElementById('autoUpdateToggle');
             toggle.classList.toggle('active', autoUpdate);
         }
 
-        // 更新显示值并触发预测
         document.querySelectorAll('input[type="range"]').forEach(input => {
             input.addEventListener('input', function() {
                 const valueDisplay = document.getElementById(`${this.id}-value`);
@@ -435,7 +517,6 @@
                 updateBadges();
 
                 if (autoUpdate) {
-                    // Debounce: 500ms 后自动请求
                     clearTimeout(debounceTimer);
                     debounceTimer = setTimeout(() => {
                         predict();
@@ -469,22 +550,20 @@
                     body: JSON.stringify({ depth, strike, dip, rake })
                 });
 
-                const data = await response.json();
+                const result = await response.json();
 
-                if (data.error) {
-                    console.error('Error:', data.error);
+                if (result.error) {
+                    console.error('Error:', result.error);
                     return;
                 }
 
-                currentData = data;
+                currentData = result;
 
-                // 更新热力图（平滑过渡）
-                updateHeatmap(data.data);
+                updateHeatmap(result.data);
 
-                // 更新统计信息（平滑淡入）
-                document.getElementById('stat-min').textContent = data.stats.min.toFixed(2) + ' cm/s';
-                document.getElementById('stat-max').textContent = data.stats.max.toFixed(2) + ' cm/s';
-                document.getElementById('stat-mean').textContent = data.stats.mean.toFixed(2) + ' cm/s';
+                document.getElementById('stat-min').textContent = result.stats.min.toFixed(2) + ' cm/s';
+                document.getElementById('stat-max').textContent = result.stats.max.toFixed(2) + ' cm/s';
+                document.getElementById('stat-mean').textContent = result.stats.mean.toFixed(2) + ' cm/s';
                 stats.style.opacity = '1';
 
             } catch (error) {
@@ -497,56 +576,92 @@
         }
 
         function updateHeatmap(data) {
+            const ny = data.length;
+            const nx = data[0].length;
+
+            const x = Array.from({ length: nx }, (_, i) => i * 60 / (nx - 1));
+            const y = Array.from({ length: ny }, (_, i) => i * 60 / (ny - 1));
+
             const trace = {
+                x: x,
+                y: y,
                 z: data,
                 type: 'heatmap',
-                colorscale: 'Hot',
-                reversescale: true,
-                hovertemplate: 'X: %{x}<br>Y: %{y}<br>PGV: %{z:.2f} cm/s<extra></extra>',
+                colorscale: customColorscale,
+                reversescale: false,
+                zsmooth: 'best',
+                connectgaps: true,
+                hovertemplate:
+                    'X: %{x:.1f} km<br>' +
+                    'Y: %{y:.1f} km<br>' +
+                    'PGV: %{z:.2f} cm/s<extra></extra>',
                 colorbar: {
-                    title: 'PGV (cm/s)',
-                    titleside: 'right',
-                    thickness: 20,
-                    len: 0.7
+                    title: {
+                        text: 'PGV (cm/s)',
+                        font: { size: 12, color: '#4a5568' }
+                    },
+                    thickness: 25,
+                    len: 0.75,
+                    tickfont: { size: 11, color: '#8492a6' },
+                    outlinewidth: 0
                 }
             };
 
             const layout = {
                 title: {
                     text: 'Peak Ground Velocity Distribution',
-                    font: { size: 18, weight: 600 }
+                    font: { size: 20, color: '#4a5568' },
+                    x: 0.5,
+                    xanchor: 'center'
                 },
-                xaxis: { title: 'Grid X' },
-                yaxis: { title: 'Grid Y' },
-                margin: { t: 60, r: 80, b: 60, l: 60 },
-                paper_bgcolor: '#f8f9fa',
-                plot_bgcolor: '#fff'
+                xaxis: {
+                    title: { text: 'Distance East (km)', font: { size: 13, color: '#8492a6' } },
+                    range: [0, 60],
+                    constrain: 'domain',
+                    showgrid: false,
+                    zeroline: false,
+                    color: '#8492a6',
+                    tickfont: { size: 11 }
+                },
+                yaxis: {
+                    title: { text: 'Distance North (km)', font: { size: 13, color: '#8492a6' } },
+                    range: [0, 60],
+                    showgrid: false,
+                    zeroline: false,
+                    color: '#8492a6',
+                    tickfont: { size: 11 },
+                    scaleanchor: 'x',
+                    scaleratio: 1
+                },
+                margin: { t: 70, r: 100, b: 70, l: 70 },
+                paper_bgcolor: '#f8f9fb',
+                plot_bgcolor: '#ffffff',
+                font: { family: "'Inter', 'SF Pro Display', -apple-system, sans-serif" }
             };
 
             const config = {
                 responsive: true,
                 displayModeBar: true,
                 displaylogo: false,
-                modeBarButtonsToRemove: ['lasso2d', 'select2d']
+                modeBarButtonsToRemove: ['lasso2d', 'select2d', 'pan2d'],
+                toImageButtonOptions: {
+                    format: 'png',
+                    filename: 'pgv_heatmap',
+                    height: 1200,
+                    width: 1200,
+                    scale: 2
+                }
             };
 
-            // 平滑过渡更新
-            if (document.getElementById('heatmap').data) {
-                Plotly.animate('heatmap', {
-                    data: [trace],
-                    layout: layout
-                }, {
-                    transition: {
-                        duration: 300,
-                        easing: 'cubic-in-out'
-                    }
-                });
+            const plotDiv = document.getElementById('heatmap');
+
+            if (plotDiv.data) {
+                Plotly.react('heatmap', [trace], layout, config);
             } else {
                 Plotly.newPlot('heatmap', [trace], layout, config);
             }
         }
 
-        // 初始化
         updateBadges();
         predict();
     </script>
