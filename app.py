@@ -15,16 +15,6 @@ def load_model():
     try:
         model = PGVReducedOrderModel.load(MODEL_PATH)
         print(f"Model loaded from {MODEL_PATH}")
-
-        # Fix parameter_ranges if it's stored as tuple instead of dict
-        if isinstance(model.parameter_ranges, tuple):
-            param_names = ("depth_km", "strike_deg", "dip_deg", "rake_deg")
-            model.parameter_ranges = {
-                name: model.parameter_ranges[i]
-                for i, name in enumerate(param_names)
-            }
-
-        print(f"Parameter ranges: {model.parameter_ranges}")
     except Exception as e:
         print(f"Failed to load model: {e}")
 
